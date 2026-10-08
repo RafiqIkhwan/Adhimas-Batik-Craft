@@ -2,23 +2,31 @@
 // All product, testimonial, process, and gallery data lives here.
 
 export const brand = {
-  name: 'Batik Sembagi',
+  name: 'Adhimas Batik Sembagi',
   tagline: 'Warisan Batik Tulis Handmade',
-  whatsappNumber: '6281234567890',
-  whatsappDisplay: '+62 812-3456-7890',
-  email: 'halo@batiksembagi.id',
-  instagram: '@batiksembagi',
+  whatsappNumber: '6285845987124',
+  whatsappDisplay: '+62 858 45987124',
+  email: 'halo@adhimasbatik.id',
+  phone: '+62 858 45987124',
+  instagram: '@adhimasbatik',
   instagramUrl: 'https://instagram.com',
+  tiktok: '@adhimasbatik',
+  openingHours: 'Senin – Sabtu: 09.00 – 17.00 WIB (Minggu Tutup)',
   address: 'Jl. Mlati Tromol Pos 2, Sleman, Yogyakarta 55281',
   year: 2026,
 };
 
 export const whatsappLink = `https://wa.me/${brand.whatsappNumber}?text=${encodeURIComponent(
-  'Halo Batik Sembagi, saya tertarik dengan koleksi batik tulis Anda.'
+  'Halo Adhimas Batik Sembagi, saya tertarik dengan koleksi batik tulis Anda.'
 )}`;
 
 export function whatsappProductLink(productName: string) {
   const msg = `Halo, saya tertarik dengan produk ${productName}. Apakah produk ini masih tersedia?`;
+  return `https://wa.me/${brand.whatsappNumber}?text=${encodeURIComponent(msg)}`;
+}
+
+export function whatsappConsultationLink(topic: string = 'Konsultasi Batik') {
+  const msg = `Halo ${brand.name}, saya ingin melakukan ${topic}. Mohon info kelanjutannya.`;
   return `https://wa.me/${brand.whatsappNumber}?text=${encodeURIComponent(msg)}`;
 }
 
@@ -485,3 +493,202 @@ export const galleryImages = [
 ];
 
 export const finalCtaImage = img(35189098, 1600);
+
+export const brandValues = [
+  {
+    title: 'Batik Tulis Asli',
+    description: '100% menggunakan canting dan lilin malam tradisional tanpa cetakan mesin.',
+  },
+  {
+    title: 'Pemberdayaan Pengrajin',
+    description: 'Mendukung kehidupan dan kemandirian pengrajin wanita di pedesaan Yogyakarta.',
+  },
+  {
+    title: 'Kelestarian Lingkungan',
+    description: 'Menggunakan pewarna alami dari tanaman dan pengelolaan limbah yang bertanggung jawab.',
+  },
+  {
+    title: 'Kualitas Tanpa Kompromi',
+    description: 'Setiap lembar kain melalui proses inspeksi ketat untuk memastikan standar karya tinggi.',
+  },
+];
+
+export const brandMilestones = [
+  {
+    year: '2010',
+    title: 'Awal Berdiri Sanggar',
+    description: 'Didirikan sebagai ruang berkarya bagi pengrajin batik tulis tradisional Sleman.',
+  },
+  {
+    year: '2015',
+    title: 'Kemitraan Komunitas',
+    description: 'Memperluas jangkauan dengan membina lebih dari 20 pembatik lokal.',
+  },
+  {
+    year: '2020',
+    title: 'Transformasi Digital',
+    description: 'Menjangkau pecinta batik dari seluruh Nusantara melalui platform online.',
+  },
+  {
+    year: '2026',
+    title: 'Adhimas Batik Sembagi',
+    description: 'Peluncuran merek eksklusif dengan komitmen tinggi pada warisan budaya.',
+  },
+];
+
+export type GalleryCategory =
+  | 'Semua'
+  | 'Karya & Produk'
+  | 'Pengrajin'
+  | 'Workshop & Studio'
+  | 'Proses Pembuatan';
+
+export const galleryCategories: GalleryCategory[] = [
+  'Semua',
+  'Karya & Produk',
+  'Pengrajin',
+  'Workshop & Studio',
+  'Proses Pembuatan',
+];
+
+export const galleryItems = [
+  {
+    id: 'g-1',
+    title: 'Pengrajin membatik dengan canting',
+    category: 'Proses Pembuatan',
+    image: img(35189098, 800),
+    alt: 'Pengrajin membatik dengan canting',
+    description: 'Proses pencanting canting halus oleh pengrajin berpengalaman di sanggar.',
+  },
+  {
+    id: 'g-2',
+    title: 'Kain batik dengan beragam warna',
+    category: 'Karya & Produk',
+    image: img(37877554, 800),
+    alt: 'Kain batik dengan beragam warna',
+    description: 'Hasil pengeringan kain batik tulis di bawah sinar matahari alami.',
+  },
+  {
+    id: 'g-3',
+    title: 'Detail tangan mencanting',
+    category: 'Pengrajin',
+    image: img(11218875, 600),
+    alt: 'Detail tangan mencanting',
+    description: 'Ketelitian jemari pengrajin saat menorehkan cairan malam panas.',
+  },
+  {
+    id: 'g-4',
+    title: 'Pengrajin membuat pola batik',
+    category: 'Workshop & Studio',
+    image: img(35243199, 800),
+    alt: 'Pengrajin membuat pola batik',
+    description: 'Suasana kerja yang tenang dan tertata di studio batik kami.',
+  },
+  {
+    id: 'g-5',
+    title: 'Model mengenakan kain batik',
+    category: 'Karya & Produk',
+    image: img(32232883, 600),
+    alt: 'Model mengenakan kain batik',
+    description: 'Peragaan busana batik tulis kontemporer untuk acara formal.',
+  },
+  {
+    id: 'g-6',
+    title: 'Pengrajin senior mengerjakan batik',
+    category: 'Pengrajin',
+    image: img(37854208, 800),
+    alt: 'Pengrajin senior mengerjakan batik',
+    description: 'Pengrajin senior dengan pengalaman puluhan tahun merawat tradisi.',
+  },
+  {
+    id: 'g-7',
+    title: 'Detail canting dan lilin panas',
+    category: 'Proses Pembuatan',
+    image: img(36642804, 600),
+    alt: 'Detail canting dan lilin panas',
+    description: 'Penyediaan canting dan lilin malam di atas anglo hangat.',
+  },
+  {
+    id: 'g-8',
+    title: 'Proses pewarnaan batik',
+    category: 'Proses Pembuatan',
+    image: img(36520221, 600),
+    alt: 'Proses pewarnaan batik',
+    description: 'Pencelupan berulang kali pada bejana warna alami.',
+  },
+];
+
+export const detailedProcesses = [
+  {
+    step: '01',
+    name: 'Nyungging & Njaprak',
+    javaneseName: 'Desain & Pola',
+    duration: '1-2 Hari',
+    image: img(35243199, 800),
+    description: 'Membuat pola dan desain batik di atas kertas lalu memindahkannya ke atas kain mori.',
+    detail: 'Pola digambar menggunakan pensil dengan memperhatikan ornamen utama dan isen-isen.',
+  },
+  {
+    step: '02',
+    name: 'Nglowong & Ngesek',
+    javaneseName: 'Mencanting Utama',
+    duration: '1-2 Minggu',
+    image: img(11218875, 800),
+    description: 'Menorehkan lilin malam menggunakan canting pada garis-garis motif utama.',
+    detail: 'Ketebalan lilin dan kerapihan goresan canting menentukan ketajaman motif akhir.',
+  },
+  {
+    step: '03',
+    name: 'Ngiseni & Nerusi',
+    javaneseName: 'Detail & Dua Sisi',
+    duration: '1-2 Minggu',
+    image: img(36642804, 800),
+    description: 'Mengisi bagian isen-isen dan mencanting sisi balik kain agar motif tembus.',
+    detail: 'Batik tulis kualitas terbaik ditandai dengan motif yang terlihat sama jelas di kedua sisi kain.',
+  },
+  {
+    step: '04',
+    name: 'Nembok',
+    javaneseName: 'Menutup Dasar',
+    duration: '2-3 Hari',
+    image: img(37854208, 800),
+    description: 'Menutup bagian kain yang harus tetap berwarna putih atau warna dasar.',
+    detail: 'Malam tembok memiliki formula khusus agar tidak retak saat pencelupan warna.',
+  },
+  {
+    step: '05',
+    name: 'Medel & Nyolet',
+    javaneseName: 'Pewarnaan Utama',
+    duration: '3-5 Hari',
+    image: img(36520221, 800),
+    description: 'Mencelup kain ke dalam bejana warna alami atau memoles warna pada bagian tertentu.',
+    detail: 'Proses pencelupan dilakukan berulang kali hingga memperoleh kepekatan warna yang sempurna.',
+  },
+  {
+    step: '06',
+    name: 'Ngerok & Girik',
+    javaneseName: 'Pembersihan Lilin Parsial',
+    duration: '1-2 Hari',
+    image: img(37877554, 800),
+    description: 'Kerok lilin malam pada area tertentu sebelum pencelupan warna kedua.',
+    detail: 'Memungkinkan terjadinya perpaduan warna dan gradasi khas batik tulis.',
+  },
+  {
+    step: '07',
+    name: 'Bithok & Mbabar',
+    javaneseName: 'Pewarnaan Kedua',
+    duration: '2-3 Hari',
+    image: img(35189098, 800),
+    description: 'Pencelupan warna tahap akhir untuk mewarnai bidang kain yang baru dibuka.',
+    detail: 'Memberikan nuansa soga atau warna tua khas batik klasik.',
+  },
+  {
+    step: '08',
+    name: 'Nglorot',
+    javaneseName: 'Pelepasan Lilin Total',
+    duration: '1 Hari',
+    image: img(32232883, 800),
+    description: 'Merebus kain dalam air mendidih untuk melarutkan seluruh lilin malam.',
+    detail: 'Keajaiban motif dan keindahan warna kain batik tulis secara utuh terpancar setelah lilin lepas.',
+  },
+];

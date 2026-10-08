@@ -19,28 +19,63 @@ import { Breadcrumb } from '@/components/collection/Breadcrumb';
 import { SectionLabel } from '@/components/ui/SectionLabel';
 import { Button } from '@/components/ui/Button';
 import { ProductBadge, ProductStatus } from '@/components/collection/ProductCard';
+import { dbService } from '@/services/db';
+import { useState } from 'react';
 
 export function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>();
-  const product = collectionProducts.find((p) => p.slug === slug);
+  const [product, setProduct] = useState<any>(
+    () => collectionProducts.find((p) => p.slug === slug) || null
+  );
+  const [related, setRelated] = useState<any[]>(() => {
+    const current = collectionProducts.find((p) => p.slug === slug);
+    if (!current) return [];
+    return collectionProducts
+      .filter((p) => p.id !== current.id && p.motif === current.motif)
+      .slice(0, 4);
+  });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    const fetchProduct = async () => {
+      try {
+        const allProducts = await dbService.getProducts();
+        const mapped = allProducts.map((p) => ({
+          ...p,
+          category: p.category_name || 'Kain Batik',
+          fabric: p.material || 'Katun',
+          status: p.stock_status || 'Tersedia',
+          image: p.images?.[0] || (p as any).image || '',
+          priceDisplay: `Rp${Number(p.price).toLocaleString('id-ID')}`,
+        }));
+        const current = mapped.find((p) => p.slug === slug);
+        if (current) {
+          setProduct(current);
+          setRelated(
+            mapped.filter((p) => p.id !== current.id && p.motif === current.motif).slice(0, 4)
+          );
+        }
+      } catch (e) {
+        console.warn('Failed to load product detail from dbService:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProduct();
   }, [slug]);
 
-  if (!product) {
+  if (!product && !loading) {
     return <Navigate to="/koleksi" replace />;
   }
 
-  const related = collectionProducts
-    .filter((p) => p.id !== product.id && p.motif === product.motif)
-    .slice(0, 4);
+  if (!product) return null;
 
   const specs = [
     { icon: Layers, label: 'Kategori', value: product.category },
     { icon: PenTool, label: 'Motif', value: product.motif },
     { icon: Droplet, label: 'Jenis Kain', value: product.fabric },
-    { icon: Palette, label: 'Teknik', value: 'Batik Tulis Manual' },
+    { icon: Palette, label: 'Teknik', value: product.technique || 'Batik Tulis Manual' },
   ];
 
   return (

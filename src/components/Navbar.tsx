@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
-import { navLinks, brand, whatsappLink } from '@/data/content';
+import { navLinks } from '@/data/content';
 import { Button } from '@/components/ui/Button';
+import { useSiteConfig } from '@/context/SiteConfigContext';
 
 function isHome(location: ReturnType<typeof useLocation>) {
   return location.pathname === '/';
@@ -10,6 +11,7 @@ function isHome(location: ReturnType<typeof useLocation>) {
 
 export function Navbar() {
   const location = useLocation();
+  const { config, whatsappLink } = useSiteConfig();
   const home = isHome(location);
   const [scrolled, setScrolled] = useState(!home);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -32,9 +34,13 @@ export function Navbar() {
     };
   }, [menuOpen]);
 
+  if (location.pathname.startsWith('/admin')) {
+    return null;
+  }
+
   const isKoleksi = location.pathname.startsWith('/koleksi');
 
-  const handleNavClick = (href: string) => {
+  const handleNavClick = () => {
     setMenuOpen(false);
   };
 
@@ -54,14 +60,14 @@ export function Navbar() {
               scrolled ? 'text-cocoa' : 'text-ivory'
             }`}
           >
-            {brand.name}
+            {config.brand_name}
           </span>
           <span
             className={`text-[10px] font-medium uppercase tracking-widest-sm transition-colors duration-500 ${
               scrolled ? 'text-gold-dark' : 'text-gold-light'
             }`}
           >
-            {brand.tagline}
+            Warisan Batik Tulis Handmade
           </span>
         </Link>
 
@@ -129,7 +135,7 @@ export function Navbar() {
         >
           <div className="flex items-center justify-between">
             <span className="font-serif text-xl font-semibold text-cocoa">
-              {brand.name}
+              {config.brand_name}
             </span>
             <button onClick={() => setMenuOpen(false)} aria-label="Tutup menu">
               <X className="h-6 w-6 text-cocoa" />
@@ -141,7 +147,7 @@ export function Navbar() {
               <li key={link.href}>
                 <Link
                   to={link.href}
-                  onClick={() => handleNavClick(link.href)}
+                  onClick={handleNavClick}
                   className="block py-3 font-serif text-xl text-cocoa transition-colors hover:text-gold-dark"
                 >
                   {link.label}

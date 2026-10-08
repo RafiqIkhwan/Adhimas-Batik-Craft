@@ -5,7 +5,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-
+/aturan/
 node_modules
 dist
 dist-ssr
@@ -21,3 +21,9 @@ dist-ssr
 *.sln
 *.sw?
 .env
+.bolt
+/.agent/
+/.agents/
+/.claude/
+.env.*
+.env.example

@@ -1,4 +1,4 @@
-import { collectionProducts } from '@/data/content';
+import { Link } from 'react-router-dom';
 
 export function ProductBadge({ badge }: { badge?: string }) {
   if (!badge) return null;
@@ -39,20 +39,27 @@ export function ProductCard({
   product,
   index,
 }: {
-  product: (typeof collectionProducts)[number];
+  product: any;
   index: number;
 }) {
+  const image = product.image || (product.images && product.images[0]) || '';
+  const fabric = product.fabric || product.material || 'Katun';
+  const status = product.status || product.stock_status || 'Tersedia';
+  const priceDisplay =
+    product.priceDisplay ||
+    `Rp${Number(product.price || 0).toLocaleString('id-ID')}`;
+
   return (
     <article
       className={`reveal reveal-delay-${(index % 4) + 1} group flex flex-col overflow-hidden rounded-sm border border-cocoa/8 bg-ivory transition-all duration-500 hover:shadow-xl hover:shadow-cocoa/8 hover:-translate-y-1`}
     >
       {/* Image */}
-      <a
-        href={`/koleksi/${product.slug}`}
-        className="relative aspect-[3/4] overflow-hidden"
+      <Link
+        to={`/koleksi/${product.slug}`}
+        className="relative aspect-[3/4] overflow-hidden bg-ivory-200"
       >
         <img
-          src={product.image}
+          src={image}
           alt={product.name}
           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
           loading="lazy"
@@ -64,7 +71,7 @@ export function ProductCard({
             Lihat Detail
           </span>
         </div>
-      </a>
+      </Link>
 
       {/* Body */}
       <div className="flex flex-1 flex-col p-4">
@@ -72,23 +79,23 @@ export function ProductCard({
           {product.name}
         </h3>
         <p className="mt-1.5 text-xs text-cocoa/50">
-          {product.motif} · {product.fabric}
+          {product.motif} · {fabric}
         </p>
 
         <div className="mt-3">
-          <ProductStatus status={product.status} />
+          <ProductStatus status={status} />
         </div>
 
         <div className="mt-auto flex items-center justify-between pt-4">
           <span className="font-sans text-base font-semibold text-maroon">
-            {product.priceDisplay}
+            {priceDisplay}
           </span>
-          <a
-            href={`/koleksi/${product.slug}`}
+          <Link
+            to={`/koleksi/${product.slug}`}
             className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-widest-sm text-cocoa transition-colors hover:text-gold-dark"
           >
             Detail
-          </a>
+          </Link>
         </div>
       </div>
     </article>

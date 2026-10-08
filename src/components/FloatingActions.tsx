@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { ArrowUp, MessageCircle } from 'lucide-react';
-import { whatsappLink } from '@/data/content';
+import { useSiteConfig } from '@/context/SiteConfigContext';
 
 export function FloatingActions() {
+  const location = useLocation();
+  const { whatsappLink } = useSiteConfig();
   const [showTop, setShowTop] = useState(false);
 
   useEffect(() => {
@@ -10,6 +13,10 @@ export function FloatingActions() {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  if (location.pathname.startsWith('/admin')) {
+    return null;
+  }
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });

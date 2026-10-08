@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ChevronDown, SlidersHorizontal, ArrowRight } from 'lucide-react';
 import {
   collectionProducts,
@@ -7,6 +7,7 @@ import {
   motifOptions,
   fabricOptions,
 } from '@/data/content';
+import { dbService } from '@/services/db';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { SectionLabel } from '@/components/ui/SectionLabel';
 import { Breadcrumb } from '@/components/collection/Breadcrumb';
@@ -36,6 +37,7 @@ const PAGE_SIZE = 8;
 export function CollectionPage() {
   const revealRef = useScrollReveal<HTMLElement>();
 
+  const [products, setProducts] = useState<any[]>(collectionProducts);
   const [category, setCategory] = useState<string>('Semua');
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
@@ -43,8 +45,39 @@ export function CollectionPage() {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await dbService.getProducts();
+        if (data && data.length > 0) {
+          setProducts(
+            data.map((p) => ({
+              id: p.id,
+              slug: p.slug,
+              name: p.name,
+              category: p.category_name || 'Kain Batik',
+              motif: p.motif,
+              fabric: p.material || 'Katun',
+              price: Number(p.price),
+              priceDisplay: `Rp${Number(p.price).toLocaleString('id-ID')}`,
+              status: p.stock_status || 'Tersedia',
+              badge: p.badge,
+              image: p.images?.[0] || (p as any).image || '',
+              description: p.description || p.short_description || '',
+              popularity: p.popularity || 80,
+              createdAt: new Date(p.created_at || Date.now()).getTime(),
+            }))
+          );
+        }
+      } catch (err) {
+        console.warn('Failed to fetch products from dbService:', err);
+      }
+    };
+    fetchProducts();
+  }, []);
+
   const filtered = useMemo(() => {
-    let result = [...collectionProducts];
+    let result = [...products];
 
     // Category
     if (category !== 'Semua') {
