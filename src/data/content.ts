@@ -1,8 +1,8 @@
-// Central content file for the Batik Sembagi site.
+// Central content file for the Batik  site.
 // All product, testimonial, process, and gallery data lives here.
 
 export const brand = {
-  name: 'Adhimas Batik Sembagi',
+  name: 'Adhimas Batik Craft',
   tagline: 'Warisan Batik Tulis Handmade',
   whatsappNumber: '6285845987124',
   whatsappDisplay: '+62 858 45987124',
@@ -17,7 +17,7 @@ export const brand = {
 };
 
 export const whatsappLink = `https://wa.me/${brand.whatsappNumber}?text=${encodeURIComponent(
-  'Halo Adhimas Batik Sembagi, saya tertarik dengan koleksi batik tulis Anda.'
+  'Halo Adhimas Batik, saya tertarik dengan koleksi batik tulis Anda.'
 )}`;
 
 export function whatsappProductLink(productName: string) {
@@ -531,7 +531,7 @@ export const brandMilestones = [
   },
   {
     year: '2026',
-    title: 'Adhimas Batik Sembagi',
+    title: 'Adhimas Batik',
     description: 'Peluncuran merek eksklusif dengan komitmen tinggi pada warisan budaya.',
   },
 ];

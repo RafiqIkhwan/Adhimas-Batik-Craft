@@ -63,7 +63,7 @@ export function AboutPage() {
               <div className="aspect-[16/11] max-h-[320px] overflow-hidden border border-cocoa/10 bg-ivory-200 sm:aspect-[4/5] sm:max-h-none">
                 <img
                   src="https://images.pexels.com/photos/35243545/pexels-photo-35243545.jpeg?auto=compress&cs=tinysrgb&w=1000"
-                  alt="Pengrajin senior Batik Sembagi"
+                  alt="Pengrajin senior Batik"
                   className="h-full w-full object-cover"
                 />
               </div>
@@ -71,14 +71,14 @@ export function AboutPage() {
 
             {/* Narrative Content */}
             <div className="lg:col-span-6">
-              <SectionLabel>Profil & Makna Sembagi</SectionLabel>
+              <SectionLabel>Profil & Makna Adhimas Batik</SectionLabel>
               <h2 className="mt-3 font-serif text-3xl font-medium leading-tight text-cocoa sm:text-4xl">
                 Kisah di Balik Nama {brand.name}
               </h2>
               
               <div className="mt-5 space-y-4 text-sm leading-relaxed text-cocoa/75">
                 <p>
-                  Kata <strong className="font-semibold text-cocoa">"Sembagi"</strong> terinspirasi dari nama kain pusaka nusantara berhias motif bunga-bunga anggun yang melambangkan kemakmuran, martabat, dan keindahan budi pekerti yang abadi melintasi zaman.
+                  Kata <strong className="font-semibold text-cocoa">"Adhimas Batik"</strong> terinspirasi dari nama kain pusaka nusantara berhias motif bunga-bunga anggun yang melambangkan kemakmuran, martabat, dan keindahan budi pekerti yang abadi melintasi zaman.
                 </p>
                 <p>
                   Didirikan di Sleman, D.I. Yogyakarta, {brand.name} berkomitmen mempertahankan tradisi batik tulis yang kian langka di tengah gempuran tekstil bermotif cetak pabrikan. Kami meyakini bahwa nilai tertinggi sebuah wastra terletak pada ketulusan proses buatan tangan (handmade).
