@@ -17,15 +17,11 @@ export function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    if (!home) {
-      setScrolled(true);
-      return;
-    }
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, [home]);
+  const onScroll = () => setScrolled(window.scrollY > 40);
+  onScroll(); // Cek posisi scroll saat komponen mount
+  window.addEventListener('scroll', onScroll, { passive: true });
+  return () => window.removeEventListener('scroll', onScroll);
+}, []); 
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : '';

@@ -47,11 +47,12 @@ function App() {
               <Navbar />
               <Routes>
                 {/* Public Routes */}
+                
                 <Route path="/" element={<Navigate to="/beranda" replace />} />
                 <Route path="/beranda" element={<HomePage />} />
                 <Route path="/koleksi" element={<CollectionPage />} />
                 <Route path="/koleksi/:slug" element={<ProductDetailPage />} />
-                <Route path="/tentang-kami" element={<AboutPage />} />
+                <Route path="/tentang" element={<AboutPage />} />
                 <Route path="/proses" element={<ProcessPage />} />
                 <Route path="/galeri" element={<GalleryPage />} />
                 <Route path="/kontak" element={<ContactPage />} />

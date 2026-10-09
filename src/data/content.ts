@@ -33,10 +33,10 @@ export function whatsappConsultationLink(topic: string = 'Konsultasi Batik') {
 export const navLinks = [
   { label: 'Beranda', href: '/' },
   { label: 'Koleksi', href: '/koleksi' },
-  { label: 'Tentang Kami', href: '/#tentang' },
-  { label: 'Proses', href: '/#proses' },
-  { label: 'Galeri', href: '/#galeri' },
-  { label: 'Kontak', href: '/#kontak' },
+  { label: 'Tentang Kami', href: '/tentang' },
+  { label: 'Proses', href: '/proses' },
+  { label: 'Galeri', href: '/galeri' },
+  { label: 'Kontak', href: '/kontak' },
 ];
 
 const img = (id: number, w = 940) =>
