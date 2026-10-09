@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AuthProvider } from '@/context/AuthContext';
 import { SiteConfigProvider } from '@/context/SiteConfigContext';
 import { Navbar } from '@/components/Navbar';
@@ -40,7 +40,7 @@ function App() {
   return (
     <AuthProvider>
       <SiteConfigProvider>
-        <BrowserRouter basename="/Adhimas-Batik-Craft">
+        <HashRouter>
           <ScrollToTop />
           <div className="min-h-screen bg-ivory flex flex-col justify-between">
             <div>
@@ -81,7 +81,7 @@ function App() {
             <Footer />
             <FloatingActions />
           </div>
-        </BrowserRouter>
+        </HashRouter>
       </SiteConfigProvider>
     </AuthProvider>
   );
