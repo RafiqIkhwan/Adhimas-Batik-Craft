@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AuthProvider } from '@/context/AuthContext';
 import { SiteConfigProvider } from '@/context/SiteConfigContext';
 import { Navbar } from '@/components/Navbar';
@@ -40,13 +40,14 @@ function App() {
   return (
     <AuthProvider>
       <SiteConfigProvider>
-        <BrowserRouter>
+        <BrowserRouter basename="/Adhimas-Batik-Craft">
           <ScrollToTop />
           <div className="min-h-screen bg-ivory flex flex-col justify-between">
             <div>
               <Navbar />
               <Routes>
                 {/* Public Routes */}
+                <Route path="/" element={<Navigate to="/beranda" replace />} />
                 <Route path="/beranda" element={<HomePage />} />
                 <Route path="/koleksi" element={<CollectionPage />} />
                 <Route path="/koleksi/:slug" element={<ProductDetailPage />} />
