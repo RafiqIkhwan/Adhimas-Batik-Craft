@@ -47,7 +47,7 @@ function App() {
               <Navbar />
               <Routes>
                 {/* Public Routes */}
-                <Route path="/" element={<HomePage />} />
+                <Route path="/beranda" element={<HomePage />} />
                 <Route path="/koleksi" element={<CollectionPage />} />
                 <Route path="/koleksi/:slug" element={<ProductDetailPage />} />
                 <Route path="/tentang-kami" element={<AboutPage />} />
