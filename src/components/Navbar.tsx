@@ -44,7 +44,7 @@ export function Navbar() {
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
         scrolled
-          ? 'bg-ivory/95 backdrop-blur-md shadow-sm shadow-cocoa/5 py-3'
+          ? 'bg-[#FDFBF7] shadow-md py-3'
           : 'bg-transparent py-5'
       }`}
     >
@@ -116,7 +116,7 @@ export function Navbar() {
 
       {/* Mobile drawer */}
       <div
-        className={`fixed inset-0 z-50 lg:hidden transition-all duration-400 ${
+        className={`fixed inset-0 z-[100] lg:hidden transition-all duration-400 ${
           menuOpen ? 'visible opacity-100' : 'invisible opacity-0'
         }`}
       >
@@ -125,7 +125,7 @@ export function Navbar() {
           onClick={() => setMenuOpen(false)}
         />
         <div
-          className={`absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-ivory px-8 py-6 shadow-2xl transition-transform duration-400 ${
+          className={`absolute right-0 top-0 h-full w-80 max-w-[85vw]bg-[#FDFBF7] z-10 overflow-y-auto bg-ivory px-8 py-6 shadow-2xl transition-transform duration-400 ${
             menuOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
         >
