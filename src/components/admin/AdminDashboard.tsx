@@ -8,8 +8,6 @@ import {
   Sparkles,
   Plus,
   ArrowRight,
-  Clock,
-  ExternalLink,
   RefreshCw,
 } from 'lucide-react';
 import { dbService } from '@/services/db';

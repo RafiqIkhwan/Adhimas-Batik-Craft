@@ -9,8 +9,8 @@ export const AdminLogin: React.FC = () => {
   const { config } = useSiteConfig();
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState('admin@adhimasbatik.id');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
@@ -44,8 +44,8 @@ export const AdminLogin: React.FC = () => {
     try {
       await login(email.trim(), password);
       navigate('/admin', { replace: true });
-    } catch (err: any) {
-      setError(err.message || 'Login gagal. Silakan periksa kembali email dan password Anda.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Login gagal. Silakan periksa kembali email dan password Anda.');
     } finally {
       setLoading(false);
     }
@@ -147,12 +147,9 @@ export const AdminLogin: React.FC = () => {
           </button>
         </form>
 
-        {/* DEFAULT CREDENTIAL HINT FOR TESTING */}
         <div className="mt-6 border-t border-cocoa/10 pt-4 text-center">
           <p className="text-[11px] text-cocoa/60 leading-relaxed">
-            Akses testing bawaan:<br />
-            Email: <code className="font-semibold text-maroon font-mono">admin@adhimasbatik.id</code><br />
-            Password: <code className="font-semibold text-maroon font-mono">admin123</code>
+            Gunakan akun administrator yang terdaftar untuk mengakses dashboard.
           </p>
         </div>
       </div>

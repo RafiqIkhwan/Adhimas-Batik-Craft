@@ -4,6 +4,14 @@ import { User } from '@/types/database';
 const SESSION_KEY = 'adhimas_admin_session_v1';
 const USERS_STORAGE_KEY = 'adhimas_users_v2';
 
+const getSessionStorage = (): Storage | null => {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  return window.sessionStorage;
+};
+
 export interface StoredUser {
   id: string;
   email: string;
@@ -26,7 +34,7 @@ async function sha256(message: string): Promise<string> {
   } catch (e) {
     console.warn('crypto.subtle hash fallback:', e);
   }
-  // Fallback hash match for admin123
+
   if (message === 'admin123') return ADMIN123_SHA256;
   return message;
 }
@@ -95,10 +103,7 @@ export const authService = {
     }
 
     // Allow direct match or SHA-256 match
-    const isValidPassword =
-      matchedUser.passwordHash === hashedInput ||
-      (cleanEmail === 'admin@adhimasbatik.id' && cleanPassword === 'admin123') ||
-      matchedUser.passwordHash === ADMIN123_SHA256 && cleanPassword === 'admin123';
+    const isValidPassword = matchedUser.passwordHash === hashedInput;
 
     if (!isValidPassword) {
       throw new Error('Password yang Anda masukkan salah.');
@@ -118,26 +123,43 @@ export const authService = {
     if (isSupabaseConfigured) {
       supabase.auth.signOut().catch(console.warn);
     }
+
+    const storage = getSessionStorage();
+    if (storage) {
+      storage.removeItem(SESSION_KEY);
+    }
     localStorage.removeItem(SESSION_KEY);
   },
 
   getCurrentUser(): User | null {
     try {
-      const raw = localStorage.getItem(SESSION_KEY);
+      const storage = getSessionStorage();
+      const raw = storage?.getItem(SESSION_KEY);
       if (!raw) return null;
-      const session: AuthSession = JSON.parse(raw);
-      if (Date.now() > session.expiresAt) {
+
+      const session: Partial<AuthSession> = JSON.parse(raw);
+      const user = session.user;
+
+      if (!user || user.role !== 'admin' || typeof user.email !== 'string' || !user.id) {
         this.logout();
         return null;
       }
-      return session.user;
+
+      if (typeof session.expiresAt !== 'number' || Date.now() > session.expiresAt) {
+        this.logout();
+        return null;
+      }
+
+      return user as User;
     } catch {
+      this.logout();
       return null;
     }
   },
 
   isAuthenticated(): boolean {
-    return this.getCurrentUser() !== null;
+    const user = this.getCurrentUser();
+    return !!user && user.role === 'admin';
   },
 
   setSession(user: User): void {
@@ -146,7 +168,12 @@ export const authService = {
       token: `token_${Date.now()}_${Math.random().toString(36).substring(2)}`,
       expiresAt: Date.now() + 1000 * 60 * 60 * 24, // 24 hours
     };
-    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+
+    const storage = getSessionStorage();
+    if (storage) {
+      storage.setItem(SESSION_KEY, JSON.stringify(session));
+    }
+    localStorage.removeItem(SESSION_KEY);
   },
 
   getStoredUsers(): StoredUser[] {
