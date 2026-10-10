@@ -105,7 +105,7 @@ const INITIAL_INQUIRIES: ContactInquiry[] = [
 ];
 
 // Helper to map collectionProducts from content.ts to Product interface
-const INITIAL_PRODUCTS: Product[] = collectionProducts.map((p: any) => {
+const INITIAL_PRODUCTS: Product[] = collectionProducts.map((p) => {
   const cat = INITIAL_CATEGORIES.find((c) => c.name === p.category);
   return {
     id: p.id,
@@ -114,25 +114,25 @@ const INITIAL_PRODUCTS: Product[] = collectionProducts.map((p: any) => {
     category_id: cat ? cat.id : 'cat-1',
     category_name: p.category,
     motif: p.motif,
-    technique: p.technique || 'Batik Tulis Canting 100% Manual',
+    technique: 'Batik Tulis Canting 100% Manual',
     material: p.fabric,
-    color: p.color || 'Gradasi Sogan & Terakota',
-    size: p.size || '250 cm × 115 cm',
+    color: 'Gradasi Sogan & Terakota',
+    size: '250 cm × 115 cm',
     price: p.price,
     stock_status: p.status,
     short_description: p.description,
     description: p.description,
-    philosophy: p.philosophy || 'Harmoni keindahan dan nilai filosofis leluhur.',
-    story: p.story || 'Dikerjakan dengan ketelitian penuh oleh pengrajin berpengalaman.',
-    production_time: p.productionTime || '4-6 Minggu',
-    images: p.images && p.images.length > 0 ? p.images : [p.image],
+    philosophy: 'Harmoni keindahan dan nilai filosofis leluhur.',
+    story: 'Dikerjakan dengan ketelitian penuh oleh pengrajin berpengalaman.',
+    production_time: '4-6 Minggu',
+    images: [p.image],
     badge: p.badge,
     popularity: p.popularity,
     created_at: new Date().toISOString(),
   };
 });
 
-const INITIAL_GALLERY: GalleryItem[] = galleryItems.map((g: any) => ({
+const INITIAL_GALLERY: GalleryItem[] = galleryItems.map((g) => ({
   id: g.id,
   title: g.title,
   category: g.category,

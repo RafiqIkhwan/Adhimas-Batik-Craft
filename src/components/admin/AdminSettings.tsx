@@ -1,5 +1,5 @@
 import React, { useState, useEffect, FormEvent } from 'react';
-import { Save, AlertCircle, CheckCircle2, Upload, Sparkles, Building2, Phone, Mail, MapPin, Clock, Share2 } from 'lucide-react';
+import { Save, AlertCircle, CheckCircle2, Upload, Building2, Phone, MapPin, Share2 } from 'lucide-react';
 import { useSiteConfig } from '@/context/SiteConfigContext';
 import { dbService } from '@/services/db';
 
@@ -59,8 +59,8 @@ export const AdminSettings: React.FC = () => {
       const url = await dbService.uploadImage(file, 'settings');
       setFormData((prev) => ({ ...prev, logo: url }));
       showToast('success', 'Logo berhasil diupload.');
-    } catch (err: any) {
-      showToast('error', err.message || 'Gagal mengupload logo.');
+    } catch (err: unknown) {
+      showToast('error', (err as Error).message || 'Gagal mengupload logo.');
     } finally {
       setUploadingLogo(false);
     }
@@ -90,8 +90,8 @@ export const AdminSettings: React.FC = () => {
 
       await refreshConfig();
       showToast('success', 'Pengaturan website berhasil diperbarui dan langsung aktif di publik.');
-    } catch (err: any) {
-      showToast('error', err.message || 'Gagal memperbarui pengaturan website.');
+    } catch (err: unknown) {
+      showToast('error', (err as Error).message || 'Gagal memperbarui pengaturan website.');
     } finally {
       setSubmitting(false);
     }
@@ -158,6 +158,7 @@ export const AdminSettings: React.FC = () => {
                   />
                 </label>
               </div>
+              {uploadingLogo && <p className="text-[11px] text-maroon font-medium mb-1">Mengunggah logo...</p>}
               <input
                 type="text"
                 value={formData.logo}

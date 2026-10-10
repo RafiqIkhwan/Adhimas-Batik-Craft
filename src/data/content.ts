@@ -11,8 +11,8 @@ export const brand = {
   instagram: '@adhimasbatik',
   instagramUrl: 'https://instagram.com',
   tiktok: '@adhimasbatik',
-  openingHours: 'Senin – Sabtu: 09.00 – 17.00 WIB (Minggu Tutup)',
-  address: 'Jl. Mlati Tromol Pos 2, Sleman, Yogyakarta 55281',
+  openingHours: 'Senin – Minggu: 08.00 – 20.00 WIB',
+  address: 'Jl. Pendem Raya, Dusun II, Jarum, Kec. Bayat, Kabupaten Klaten, Jawa Tengah 57462',
   year: 2026,
 };
 

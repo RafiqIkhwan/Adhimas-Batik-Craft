@@ -33,8 +33,7 @@ export function Hero() {
 
           <h1
             className="reveal is-visible reveal-delay-1 mt-6 font-serif text-4xl font-medium leading-[1.15] text-ivory text-balance sm:text-5xl lg:text-6xl"
-          >
-            Hidup Jokowi!, 
+          > 
           Warisan Batik Tulis, Dihadirkan dengan Karakter yang Tak Lekang Waktu.
           </h1>
 
