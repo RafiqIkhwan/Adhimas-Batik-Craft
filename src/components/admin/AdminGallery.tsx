@@ -1,5 +1,5 @@
 import React, { useState, useEffect, FormEvent } from 'react';
-import { Plus, Edit, Trash2, X, AlertCircle, CheckCircle2, Upload, ZoomIn, Image as ImageIcon } from 'lucide-react';
+import { Plus, Edit, Trash2, X, AlertCircle, CheckCircle2, Upload } from 'lucide-react';
 import { dbService } from '@/services/db';
 import { GalleryItem } from '@/types/database';
 
@@ -38,8 +38,8 @@ export const AdminGallery: React.FC = () => {
     try {
       const data = await dbService.getGallery();
       setGallery(data);
-    } catch (err) {
-      console.error('Failed to load gallery:', err);
+    } catch (err: unknown) {
+     showToast('error', err instanceof Error ? err.message : 'Gagal...');
     } finally {
       setLoading(false);
     }
@@ -98,8 +98,8 @@ export const AdminGallery: React.FC = () => {
       const url = await dbService.uploadImage(file, 'gallery');
       setFormData((prev) => ({ ...prev, image: url }));
       showToast('success', 'Gambar berhasil diupload.');
-    } catch (err: any) {
-      showToast('error', err.message || 'Gagal mengupload gambar.');
+    } catch (err: unknown) {
+      showToast('error', err instanceof Error ? err.message : 'Gagal mengupload gambar.');
     } finally {
       setUploadingImage(false);
     }
@@ -136,9 +136,9 @@ export const AdminGallery: React.FC = () => {
       }
 
       setModalOpen(false);
-      loadData();
-    } catch (err: any) {
-      showToast('error', err.message || 'Gagal menyimpan foto galeri.');
+     await  loadData();
+    } catch (err: unknown) {
+      showToast('error', err instanceof Error ? err.message : 'Gagal menyimpan foto galeri.');
     } finally {
       setSubmitting(false);
     }
@@ -157,9 +157,9 @@ export const AdminGallery: React.FC = () => {
       showToast('success', `Foto "${itemToDelete.title}" berhasil dihapus.`);
       setDeleteModalOpen(false);
       setItemToDelete(null);
-      loadData();
-    } catch (err: any) {
-      showToast('error', err.message || 'Gagal menghapus foto.');
+     await  loadData();
+   } catch (err: unknown) {
+    showToast('error', err instanceof Error ? err.message : 'Gagal...');
     } finally {
       setSubmitting(false);
     }
