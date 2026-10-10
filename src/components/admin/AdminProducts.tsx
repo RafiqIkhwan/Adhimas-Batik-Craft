@@ -17,6 +17,7 @@ export const AdminProducts: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
   // Filters
   const [search, setSearch] = useState('');
@@ -59,22 +60,26 @@ export const AdminProducts: React.FC = () => {
 
   const loadData = async () => {
     setLoading(true);
+    setLoadError('');
     try {
       const [prods, cats] = await Promise.all([
         dbService.getProducts(),
-        dbService.getCategories(),
+        dbService.getCategories({ strict: true }),
       ]);
       setProducts(prods);
       setCategories(cats);
+      return true;
     } catch (err) {
       console.error('Failed to load products data:', err);
+      setLoadError(err instanceof Error ? err.message : 'Gagal memuat data produk dan kategori.');
+      return false;
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadData();
+    void loadData();
   }, []);
 
   const showToast = (type: 'success' | 'error', message: string) => {
@@ -206,13 +211,10 @@ export const AdminProducts: React.FC = () => {
         .map((s) => s.trim())
         .filter((s) => s.length > 0);
 
-      const targetCategory = categories.find((c) => c.id === formData.category_id);
-
       const payload = {
         name: formData.name.trim(),
         slug: formData.slug.trim(),
         category_id: formData.category_id,
-        category_name: targetCategory?.name || 'Kain Batik',
         motif: formData.motif.trim(),
         technique: formData.technique.trim(),
         material: formData.material.trim(),
@@ -228,16 +230,21 @@ export const AdminProducts: React.FC = () => {
         images: imageArray.length > 0 ? imageArray : ['https://images.pexels.com/photos/37877554/pexels-photo-37877554.jpeg?auto=compress&cs=tinysrgb&w=800'],
       };
 
+      let successMessage: string;
       if (editingProduct) {
         await dbService.updateProduct(editingProduct.id, payload);
-        showToast('success', `Produk "${payload.name}" berhasil diperbarui.`);
+        successMessage = `Produk "${payload.name}" berhasil diperbarui.`;
       } else {
         await dbService.createProduct(payload);
-        showToast('success', `Produk "${payload.name}" berhasil ditambahkan.`);
+        successMessage = `Produk "${payload.name}" berhasil ditambahkan.`;
       }
 
       setModalOpen(false);
-      loadData();
+      const refreshed = await loadData();
+      showToast(
+        'success',
+        `${successMessage}${refreshed ? '' : ' Data tersimpan, tetapi daftar gagal dimuat ulang.'}`
+      );
     } catch (err: unknown) {
       showToast('error', err instanceof Error ? err.message : 'Gagal menyimpan produk.');
     } finally {
@@ -255,10 +262,13 @@ export const AdminProducts: React.FC = () => {
     setSubmitting(true);
     try {
       await dbService.deleteProduct(productToDelete.id);
-      showToast('success', `Produk "${productToDelete.name}" berhasil dihapus.`);
       setDeleteModalOpen(false);
       setProductToDelete(null);
-      loadData();
+      const refreshed = await loadData();
+      showToast(
+        'success',
+        `Produk "${productToDelete.name}" berhasil dihapus.${refreshed ? '' : ' Daftar gagal dimuat ulang.'}`
+      );
     } catch (err: unknown) {
       showToast('error', err instanceof Error ? err.message : 'Gagal menghapus produk.');
     } finally {
@@ -365,7 +375,19 @@ export const AdminProducts: React.FC = () => {
 
       {/* PRODUCTS TABLE */}
       <div className="border border-cocoa/10 bg-ivory overflow-hidden shadow-xs">
-        {loading ? (
+        {loadError ? (
+          <div role="alert" className="flex flex-col items-center gap-3 py-12 px-4 text-center">
+            <p className="text-sm font-medium text-red-800">Gagal memuat data produk dan kategori.</p>
+            <p className="max-w-2xl text-xs text-red-700">{loadError}</p>
+            <button
+              type="button"
+              onClick={() => void loadData()}
+              className="border border-cocoa/20 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-cocoa hover:bg-ivory-50"
+            >
+              Coba lagi
+            </button>
+          </div>
+        ) : loading ? (
           <div className="py-16 text-center text-xs text-cocoa/60">Memuat data produk...</div>
         ) : filteredProducts.length === 0 ? (
           <div className="py-16 text-center text-xs text-cocoa/60">

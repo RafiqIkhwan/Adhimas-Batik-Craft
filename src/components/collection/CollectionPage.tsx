@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronDown, SlidersHorizontal, ArrowRight } from 'lucide-react';
+import { ChevronDown, SlidersHorizontal } from 'lucide-react';
 import {
-  collectionProducts,
-  productCategories,
   priceRanges,
   motifOptions,
   fabricOptions,
@@ -24,6 +22,7 @@ import { ProductCard } from '@/components/collection/ProductCard';
 import { EmptyState } from '@/components/collection/EmptyState';
 import { TrustSection } from '@/components/collection/TrustSection';
 import { CollectionCTA } from '@/components/collection/CollectionCTA';
+import type { Product } from '@/types/database';
 
 const sortOptions: SortOption[] = [
   { label: 'Produk Terbaru', value: 'newest' },
@@ -37,7 +36,10 @@ const PAGE_SIZE = 8;
 export function CollectionPage() {
   const revealRef = useScrollReveal<HTMLElement>();
 
-  const [products, setProducts] = useState<any[]>(collectionProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [productsError, setProductsError] = useState(false);
+  const [reloadProducts, setReloadProducts] = useState(0);
   const [category, setCategory] = useState<string>('Semua');
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
@@ -46,42 +48,51 @@ export function CollectionPage() {
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchProducts = async () => {
+      setProductsLoading(true);
+      setProductsError(false);
       try {
         const data = await dbService.getProducts();
-        if (data && data.length > 0) {
-          setProducts(
-            data.map((p) => ({
-              id: p.id,
-              slug: p.slug,
-              name: p.name,
-              category: p.category_name || 'Kain Batik',
-              motif: p.motif,
-              fabric: p.material || 'Katun',
-              price: Number(p.price),
-              priceDisplay: `Rp${Number(p.price).toLocaleString('id-ID')}`,
-              status: p.stock_status || 'Tersedia',
-              badge: p.badge,
-              image: p.images?.[0] || (p as any).image || '',
-              description: p.description || p.short_description || '',
-              popularity: p.popularity || 80,
-              createdAt: new Date(p.created_at || Date.now()).getTime(),
-            }))
-          );
+        if (!cancelled) {
+          setProducts(data);
         }
       } catch (err) {
-        console.warn('Failed to fetch products from dbService:', err);
+        console.error('Failed to fetch products from dbService:', err);
+        if (!cancelled) {
+          setProducts([]);
+          setProductsError(true);
+        }
+      } finally {
+        if (!cancelled) {
+          setProductsLoading(false);
+        }
       }
     };
-    fetchProducts();
-  }, []);
+
+    void fetchProducts();
+    return () => {
+      cancelled = true;
+    };
+  }, [reloadProducts]);
+
+  const categories = useMemo(
+    () => [
+      'Semua',
+      ...new Set(products.map((product) => product.category_name || 'Kain Batik')),
+    ],
+    [products]
+  );
 
   const filtered = useMemo(() => {
     let result = [...products];
 
     // Category
     if (category !== 'Semua') {
-      result = result.filter((p) => p.category === category);
+      result = result.filter(
+        (p) => (p.category_name || 'Kain Batik') === category
+      );
     }
 
     // Search
@@ -91,7 +102,7 @@ export function CollectionPage() {
         (p) =>
           p.name.toLowerCase().includes(q) ||
           p.motif.toLowerCase().includes(q) ||
-          p.category.toLowerCase().includes(q)
+          (p.category_name || 'Kain Batik').toLowerCase().includes(q)
       );
     }
 
@@ -122,25 +133,25 @@ export function CollectionPage() {
           const known = fabricOptions.filter((f) => f !== 'Lainnya');
           return (
             filters.fabrics.some((f) =>
-              p.fabric.toLowerCase().includes(f.toLowerCase())
-            ) || !known.some((k) => p.fabric.toLowerCase().includes(k.toLowerCase()))
+              p.material.toLowerCase().includes(f.toLowerCase())
+            ) || !known.some((k) => p.material.toLowerCase().includes(k.toLowerCase()))
           );
         }
         return filters.fabrics.some((f) =>
-          p.fabric.toLowerCase().includes(f.toLowerCase())
+          p.material.toLowerCase().includes(f.toLowerCase())
         );
       });
     }
 
     // Status
     if (filters.statuses.length > 0) {
-      result = result.filter((p) => filters.statuses.includes(p.status));
+      result = result.filter((p) => filters.statuses.includes(p.stock_status));
     }
 
     // Sort
     switch (sort) {
       case 'popular':
-        result.sort((a, b) => b.popularity - a.popularity);
+        result.sort((a, b) => (b.popularity ?? 0) - (a.popularity ?? 0));
         break;
       case 'price-asc':
         result.sort((a, b) => a.price - b.price);
@@ -149,11 +160,15 @@ export function CollectionPage() {
         result.sort((a, b) => b.price - a.price);
         break;
       default:
-        result.sort((a, b) => a.createdAt - b.createdAt);
+        result.sort(
+          (a, b) =>
+            new Date(b.created_at || 0).getTime() -
+            new Date(a.created_at || 0).getTime()
+        );
     }
 
     return result;
-  }, [category, search, filters, sort]);
+  }, [products, category, search, filters, sort]);
 
   const visible = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < filtered.length;
@@ -209,7 +224,7 @@ export function CollectionPage() {
         <div className="mx-auto max-w-7xl px-6 lg:px-10">
           {/* Category tabs */}
           <CategoryTabs
-            categories={productCategories}
+            categories={categories}
             active={category}
             onSelect={(c) => {
               setCategory(c);
@@ -271,7 +286,23 @@ export function CollectionPage() {
                 </p>
               </div>
 
-              {visible.length === 0 ? (
+              {productsLoading ? (
+                <div className="py-16 text-center text-sm text-cocoa/60" role="status">
+                  Memuat koleksi produk...
+                </div>
+              ) : productsError ? (
+                <div className="py-16 text-center" role="alert">
+                  <p className="text-sm text-cocoa/70">
+                    Gagal memuat koleksi produk. Silakan coba lagi.
+                  </p>
+                  <button
+                    onClick={() => setReloadProducts((count) => count + 1)}
+                    className="mt-4 text-xs font-semibold uppercase tracking-widest-sm text-maroon transition-colors hover:text-gold-dark"
+                  >
+                    Coba Lagi
+                  </button>
+                </div>
+              ) : visible.length === 0 ? (
                 <EmptyState onReset={resetAll} />
               ) : (
                 <>

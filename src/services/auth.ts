@@ -54,29 +54,35 @@ export const authService = {
       throw new Error('Email dan password wajib diisi.');
     }
 
-    // 1. If Supabase Auth is enabled
+    // Database admin access requires a Supabase Auth session with an admin claim.
     if (isSupabaseConfigured) {
-      try {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: cleanEmail,
-          password: cleanPassword,
-        });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: cleanEmail,
+        password: cleanPassword,
+      });
 
-        if (!error && data.user) {
-          const user: User = {
-            id: data.user.id,
-            email: data.user.email || cleanEmail,
-            role: 'admin',
-          };
-          this.setSession(user);
-          return user;
-        }
-      } catch (e) {
-        console.warn('Supabase auth error, checking fallback admin:', e);
+      if (error) {
+        throw error;
       }
+
+      if (!data.user || data.user.app_metadata?.role !== 'admin') {
+        const { error: signOutError } = await supabase.auth.signOut();
+        if (signOutError) {
+          console.error('Failed to sign out non-admin Supabase user:', signOutError);
+        }
+        throw new Error('Akun ini tidak memiliki akses admin.');
+      }
+
+      const user: User = {
+        id: data.user.id,
+        email: data.user.email || cleanEmail,
+        role: 'admin',
+      };
+      this.setSession(user);
+      return user;
     }
 
-    // 2. Local Fallback Admin Check
+    // Local-only development fallback; never used when the Supabase database is configured.
     const hashedInput = await sha256(cleanPassword);
     const storedUsers = this.getStoredUsers();
 

@@ -25,11 +25,30 @@ export function useScrollReveal<T extends HTMLElement = HTMLDivElement>(
       { threshold: 0.15, rootMargin: '0px 0px -60px 0px', ...options }
     );
 
+    const observeRevealElements = (root: ParentNode) => {
+      root.querySelectorAll('.reveal').forEach((child) => observer.observe(child));
+    };
+
     // Observe the element itself and all children with `.reveal`
     observer.observe(el);
-    el.querySelectorAll('.reveal').forEach((child) => observer.observe(child));
+    observeRevealElements(el);
 
-    return () => observer.disconnect();
+    const mutationObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node instanceof Element) {
+            if (node.matches('.reveal')) observer.observe(node);
+            observeRevealElements(node);
+          }
+        });
+      });
+    });
+    mutationObserver.observe(el, { childList: true, subtree: true });
+
+    return () => {
+      observer.disconnect();
+      mutationObserver.disconnect();
+    };
   }, [options]);
 
   return ref;

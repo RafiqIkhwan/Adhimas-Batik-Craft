@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import type { Product } from '@/types/database';
 
 export function ProductBadge({ badge }: { badge?: string }) {
   if (!badge) return null;
@@ -39,15 +40,11 @@ export function ProductCard({
   product,
   index,
 }: {
-  product: any;
+  product: Product;
   index: number;
 }) {
-  const image = product.image || (product.images && product.images[0]) || '';
-  const fabric = product.fabric || product.material || 'Katun';
-  const status = product.status || product.stock_status || 'Tersedia';
-  const priceDisplay =
-    product.priceDisplay ||
-    `Rp${Number(product.price || 0).toLocaleString('id-ID')}`;
+  const image = product.images?.find((url) => url.trim()) || '';
+  const priceDisplay = `Rp${Number(product.price).toLocaleString('id-ID')}`;
 
   return (
     <article
@@ -58,12 +55,18 @@ export function ProductCard({
         to={`/koleksi/${product.slug}`}
         className="relative aspect-[3/4] overflow-hidden bg-ivory-200"
       >
-        <img
-          src={image}
-          alt={product.name}
-          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-          loading="lazy"
-        />
+        {image ? (
+          <img
+            src={image}
+            alt={product.name}
+            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+            loading="lazy"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center px-4 text-center text-xs text-cocoa/50">
+            Gambar produk belum tersedia
+          </div>
+        )}
         <ProductBadge badge={product.badge} />
         {/* Hover overlay CTA */}
         <div className="absolute inset-0 flex items-end justify-center bg-cocoa-dark/0 pb-6 opacity-0 transition-all duration-500 group-hover:bg-cocoa-dark/25 group-hover:opacity-100">
@@ -79,11 +82,11 @@ export function ProductCard({
           {product.name}
         </h3>
         <p className="mt-1.5 text-xs text-cocoa/50">
-          {product.motif} · {fabric}
+          {[product.motif, product.material].filter(Boolean).join(' · ')}
         </p>
 
         <div className="mt-3">
-          <ProductStatus status={status} />
+          <ProductStatus status={product.stock_status} />
         </div>
 
         <div className="mt-auto flex items-center justify-between pt-4">

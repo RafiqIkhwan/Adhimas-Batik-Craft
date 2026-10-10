@@ -104,10 +104,12 @@ ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
 -- PUBLIC READ POLICIES
 DROP POLICY IF EXISTS "Public read categories" ON public.categories;
-CREATE POLICY "Public read categories" ON public.categories FOR SELECT USING (true);
+CREATE POLICY "Public read categories" ON public.categories
+    FOR SELECT TO anon, authenticated USING (true);
 
 DROP POLICY IF EXISTS "Public read products" ON public.products;
-CREATE POLICY "Public read products" ON public.products FOR SELECT USING (true);
+CREATE POLICY "Public read products" ON public.products
+    FOR SELECT TO anon, authenticated USING (true);
 
 DROP POLICY IF EXISTS "Public read gallery" ON public.gallery;
 CREATE POLICY "Public read gallery" ON public.gallery FOR SELECT USING (true);
@@ -119,12 +121,24 @@ CREATE POLICY "Public read site_config" ON public.site_config FOR SELECT USING (
 DROP POLICY IF EXISTS "Public insert inquiries" ON public.contact_inquiries;
 CREATE POLICY "Public insert inquiries" ON public.contact_inquiries FOR INSERT WITH CHECK (true);
 
--- ALL ACCESS FOR AUTHENTICATED ADMINS AND ANON ADMIN OVERRIDES
+-- Product and category changes require a trusted Supabase Auth admin claim.
 DROP POLICY IF EXISTS "Admin full access categories" ON public.categories;
-CREATE POLICY "Admin full access categories" ON public.categories FOR ALL USING (true);
+DROP POLICY IF EXISTS "Admin manage categories" ON public.categories;
+CREATE POLICY "Admin manage categories" ON public.categories
+    FOR ALL TO authenticated
+    USING ((SELECT auth.jwt() -> 'app_metadata' ->> 'role') = 'admin')
+    WITH CHECK ((SELECT auth.jwt() -> 'app_metadata' ->> 'role') = 'admin');
 
 DROP POLICY IF EXISTS "Admin full access products" ON public.products;
-CREATE POLICY "Admin full access products" ON public.products FOR ALL USING (true);
+DROP POLICY IF EXISTS "Admin manage products" ON public.products;
+CREATE POLICY "Admin manage products" ON public.products
+    FOR ALL TO authenticated
+    USING ((SELECT auth.jwt() -> 'app_metadata' ->> 'role') = 'admin')
+    WITH CHECK ((SELECT auth.jwt() -> 'app_metadata' ->> 'role') = 'admin');
+
+REVOKE ALL ON TABLE public.categories, public.products FROM PUBLIC, anon, authenticated;
+GRANT SELECT ON TABLE public.categories, public.products TO anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.categories, public.products TO authenticated;
 
 DROP POLICY IF EXISTS "Admin full access gallery" ON public.gallery;
 CREATE POLICY "Admin full access gallery" ON public.gallery FOR ALL USING (true);

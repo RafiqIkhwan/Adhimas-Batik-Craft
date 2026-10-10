@@ -202,13 +202,24 @@ export const dbService = {
   },
 
   // --- CATEGORIES ---
-  async getCategories(): Promise<Category[]> {
+  async getCategories(options: { strict?: boolean } = {}): Promise<Category[]> {
     if (isSupabaseConfigured) {
       try {
         const { data, error } = await supabase.from('categories').select('*').order('name');
-        if (!error && data && data.length > 0) return data;
-      } catch (e) {
-        console.warn('Supabase categories fetch error:', e);
+        if (error) {
+          throw error;
+        }
+        if (options.strict) {
+          return data ?? [];
+        }
+        if (data && data.length > 0) {
+          return data;
+        }
+      } catch (error) {
+        if (options.strict) {
+          throw error;
+        }
+        console.warn('Supabase categories fetch error:', error);
       }
     }
     return getLocal<Category[]>(STORAGE_KEYS.CATEGORIES, INITIAL_CATEGORIES);
@@ -288,20 +299,18 @@ export const dbService = {
   // --- PRODUCTS ---
   async getProducts(): Promise<Product[]> {
     if (isSupabaseConfigured) {
-      try {
-        const { data, error } = await supabase
-          .from('products')
-          .select('*, categories(name)')
-          .order('created_at', { ascending: false });
-        if (!error && data && data.length > 0) {
-          return data.map((item: any) => ({
-            ...item,
-            category_name: item.categories?.name || 'Kain Batik',
-          }));
-        }
-      } catch (e) {
-        console.warn('Supabase products fetch error:', e);
+      const { data, error } = await supabase
+        .from('products')
+        .select('*, categories(name)')
+        .order('created_at', { ascending: false });
+      if (error) {
+        throw error;
       }
+
+      return (data ?? []).map((item: Product & { categories: Pick<Category, 'name'> | null }) => ({
+        ...item,
+        category_name: item.categories?.name || 'Kain Batik',
+      }));
     }
 
     const categories = getLocal<Category[]>(STORAGE_KEYS.CATEGORIES, INITIAL_CATEGORIES);
@@ -322,7 +331,12 @@ export const dbService = {
     return products.find((p) => p.slug === slug) || null;
   },
 
-  async createProduct(productData: Omit<Product, 'id' | 'created_at' | 'updated_at'>): Promise<Product> {
+  async createProduct(
+    productData: Omit<
+      Product,
+      'id' | 'created_at' | 'updated_at' | 'category_name' | 'badge' | 'popularity'
+    >
+  ): Promise<Product> {
     // Validate slug uniqueness
     const existing = await this.getProducts();
     if (existing.some((p) => p.slug === productData.slug)) {
@@ -338,12 +352,19 @@ export const dbService = {
     };
 
     if (isSupabaseConfigured) {
-      try {
-        const { data, error } = await supabase.from('products').insert([productData]).select().single();
-        if (!error && data) return data;
-      } catch (e) {
-        console.warn('Supabase create product error:', e);
+      const { data, error } = await supabase
+        .from('products')
+        .insert([productData])
+        .select('*, categories(name)')
+        .single();
+      if (error) {
+        throw error;
       }
+
+      return {
+        ...data,
+        category_name: data.categories?.name || 'Kain Batik',
+      };
     }
 
     existing.unshift(newProduct);
@@ -351,7 +372,12 @@ export const dbService = {
     return newProduct;
   },
 
-  async updateProduct(id: string, productData: Partial<Product>): Promise<Product> {
+  async updateProduct(
+    id: string,
+    productData: Partial<
+      Omit<Product, 'id' | 'created_at' | 'updated_at' | 'category_name' | 'badge' | 'popularity'>
+    >
+  ): Promise<Product> {
     const existing = await this.getProducts();
     if (productData.slug) {
       const duplicate = existing.find((p) => p.slug === productData.slug && p.id !== id);
@@ -361,17 +387,20 @@ export const dbService = {
     }
 
     if (isSupabaseConfigured) {
-      try {
-        const { data, error } = await supabase
-          .from('products')
-          .update({ ...productData, updated_at: new Date().toISOString() })
-          .eq('id', id)
-          .select()
-          .single();
-        if (!error && data) return data;
-      } catch (e) {
-        console.warn('Supabase update product error:', e);
+      const { data, error } = await supabase
+        .from('products')
+        .update({ ...productData, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select('*, categories(name)')
+        .single();
+      if (error) {
+        throw error;
       }
+
+      return {
+        ...data,
+        category_name: data.categories?.name || 'Kain Batik',
+      };
     }
 
     const idx = existing.findIndex((p) => p.id === id);
@@ -385,12 +414,17 @@ export const dbService = {
 
   async deleteProduct(id: string): Promise<void> {
     if (isSupabaseConfigured) {
-      try {
-        const { error } = await supabase.from('products').delete().eq('id', id);
-        if (!error) return;
-      } catch (e) {
-        console.warn('Supabase delete product error:', e);
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', id)
+        .select('id')
+        .single();
+      if (error) {
+        throw error;
       }
+
+      return;
     }
 
     const products = await this.getProducts();
@@ -553,21 +587,24 @@ export const dbService = {
   // --- FILE UPLOAD HELPER ---
   async uploadImage(file: File, folder: 'products' | 'gallery' | 'settings' = 'products'): Promise<string> {
     if (isSupabaseConfigured) {
-      try {
-        const ext = file.name.split('.').pop();
-        const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2)}.${ext}`;
-        const { data, error } = await supabase.storage.from('media').upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: true,
-        });
+      const ext = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${ext}`;
+      
+      // Targetkan ke bucket 'products' secara dinamis sesuai parameter folder
+      const { data, error } = await supabase.storage.from(folder).upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: true,
+      });
 
-        if (!error && data) {
-          const { data: publicUrlData } = supabase.storage.from('media').getPublicUrl(fileName);
-          if (publicUrlData?.publicUrl) return publicUrlData.publicUrl;
-        }
-      } catch (e) {
-        console.warn('Supabase storage upload error, falling back to data URL:', e);
+      if (error) {
+        throw error;
       }
+
+      const { data: publicUrlData } = supabase.storage.from(folder).getPublicUrl(data.path);
+      if (!publicUrlData.publicUrl) {
+        throw new Error('URL publik gambar tidak tersedia.');
+      }
+      return publicUrlData.publicUrl;
     }
 
     // Fallback to Data URL for LocalStorage
