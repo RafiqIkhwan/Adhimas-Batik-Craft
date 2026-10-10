@@ -1,9 +1,11 @@
+import { useState, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { collectionProducts } from '@/data/content';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { SectionLabel } from '@/components/ui/SectionLabel';
 import { Button } from '@/components/ui/Button';
+import { dbService } from '@/services/db';
+import type { Product } from '@/types/database';
 
 const badgeStyles: Record<string, string> = {
   'Best Seller': 'bg-maroon text-ivory',
@@ -13,6 +15,22 @@ const badgeStyles: Record<string, string> = {
 
 export function FeaturedCollection() {
   const ref = useScrollReveal<HTMLElement>();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await dbService.getProducts();
+        setProducts(data.slice(0, 4));
+      } catch (err) {
+        console.error('Failed to fetch featured products:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    void fetchProducts();
+  }, []);
 
   return (
     <section id="koleksi" ref={ref} className="bg-beige/30 py-24 lg:py-32">
@@ -26,63 +44,72 @@ export function FeaturedCollection() {
             Koleksi Pilihan Kami
           </h2>
           <p className="mt-5 max-w-xl text-base leading-relaxed text-cocoa/60">
-            Temukan karya batik yang memiliki karakter dan cerita untuk setiap
-            kesempatan.
+            Temukan karya batik yang memiliki karakter dan cerita untuk setiap kesempatan.
           </p>
         </div>
 
         {/* Product grid */}
         <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {collectionProducts.slice(0, 4).map((p, i) => (
-            <article
-              key={p.id}
-              className={`reveal reveal-delay-${i + 1} group flex flex-col overflow-hidden rounded-sm border border-cocoa/8 bg-ivory transition-all duration-500 hover:shadow-xl hover:shadow-cocoa/8 hover:-translate-y-1`}
-            >
-              {/* Image */}
-              <Link to={`/koleksi/${p.slug}`} className="relative aspect-[3/4] overflow-hidden">
-                <img
-                  src={p.image}
-                  alt={p.name}
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  loading="lazy"
-                />
-                {p.badge && (
-                  <span
-                    className={`absolute left-4 top-4 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-widest-sm ${
-                      badgeStyles[p.badge] ?? 'bg-cocoa text-ivory'
-                    }`}
-                  >
-                    {p.badge}
-                  </span>
-                )}
-              </Link>
+          {loading ? (
+            <div className="col-span-full py-12 text-center text-xs text-cocoa/60">
+              Memuat koleksi produk...
+            </div>
+          ) : products.length === 0 ? (
+            <div className="col-span-full py-12 text-center text-xs text-cocoa/60">
+              Belum ada koleksi produk yang tersedia.
+            </div>
+          ) : (
+            products.map((p, i) => (
+              <article
+                key={p.id}
+                className={`reveal reveal-delay-${i + 1} group flex flex-col overflow-hidden rounded-sm border border-cocoa/8 bg-ivory transition-all duration-500 hover:shadow-xl hover:shadow-cocoa/8 hover:-translate-y-1`}
+              >
+                {/* Image */}
+                <Link to={`/koleksi/${p.slug}`} className="relative aspect-[3/4] overflow-hidden">
+                  <img
+                    src={p.images?.[0] || 'https://images.pexels.com/photos/37877554/pexels-photo-37877554.jpeg?auto=compress&cs=tinysrgb&w=800'}
+                    alt={p.name}
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    loading="lazy"
+                  />
+                  {p.badge && (
+                    <span
+                      className={`absolute left-4 top-4 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-widest-sm ${
+                        badgeStyles[p.badge] ?? 'bg-cocoa text-ivory'
+                      }`}
+                    >
+                      {p.badge}
+                    </span>
+                  )}
+                </Link>
 
-              {/* Body */}
-              <div className="flex flex-1 flex-col p-5">
-                <h3 className="font-serif text-lg font-medium text-cocoa">
-                  {p.name}
-                </h3>
-                <div className="mt-2 flex items-center gap-2 text-xs text-cocoa/50">
-                  <span>Motif: {p.motif}</span>
-                  <span className="text-gold">•</span>
-                  <span>{p.fabric}</span>
-                </div>
+                {/* Body */}
+                <div className="flex flex-1 flex-col p-5">
+                  <h3 className="font-serif text-lg font-medium text-cocoa">
+                    {p.name}
+                  </h3>
+                  <div className="mt-2 flex items-center gap-2 text-xs text-cocoa/50">
+                    <span>Motif: {p.motif}</span>
+                    <span className="text-gold">•</span>
+                    <span>{p.material || 'Katun'}</span>
+                  </div>
 
-                <div className="mt-auto flex items-center justify-between pt-5">
-                  <span className="font-sans text-lg font-semibold text-maroon">
-                    {p.priceDisplay}
-                  </span>
-                  <Link
-                    to={`/koleksi/${p.slug}`}
-                    className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-widest-sm text-cocoa transition-colors hover:text-gold-dark"
-                  >
-                    Lihat Detail
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
+                  <div className="mt-auto flex items-center justify-between pt-5">
+                    <span className="font-sans text-lg font-semibold text-maroon">
+                      Rp{Number(p.price).toLocaleString('id-ID')}
+                    </span>
+                    <Link
+                      to={`/koleksi/${p.slug}`}
+                      className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-widest-sm text-cocoa transition-colors hover:text-gold-dark"
+                    >
+                      Lihat Detail
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            ))
+          )}
         </div>
 
         {/* CTA */}
